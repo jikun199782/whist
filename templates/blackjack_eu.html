@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <link rel="stylesheet" href="/static/blackjack.css">
+    <link rel="preload" href="/static/svg-cards.svg" as="image" type="image/svg+xml">
+{% endblock %}
+
+{% block main_content %}
+    <div class="game-area">
+        <div class="dealer-area">
+            <h2>Dealer's Hand ({{ game_state['dealer_value'] }})</h2>
+            <div class="cards">
+                {% if not game_state['message'] %}
+                    <svg class="card" viewBox="0 0 169 244">
+                        <use href="/static/svg-cards.svg#{{ get_card_name(game_state['dealer_hand'][0]) }}"/>
+                    </svg>
+                    <svg class="card" viewBox="0 0 169 244">
+                        <use href="/static/svg-cards.svg#back"/>
+                    </svg>
+                {% else %}
+                    {% for card in game_state['dealer_hand'] %}
+                        <svg class="card" viewBox="0 0 169 244">
+                            <use href="/static/svg-cards.svg#{{ get_card_name(card) }}"/>
+                        </svg>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="player-area">
+            <h2>Your Hand ({{ game_state['player_value'] }})</h2>
+            <div class="cards">
+                {% for card in game_state['player_hand'] %}
+                    <svg class="card" viewBox="0 0 169 244">
+                        <use href="/static/svg-cards.svg#{{ get_card_name(card) }}"/>
+                    </svg>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="actions">
+            {% if not game_state['message'] %}
+                <a href="{{ url_for('game_update', action='hit') }}" class="btn">Hit</a>
+                <a href="{{ url_for('game_update', action='stand') }}" class="btn">Stand</a>
+            {% else %}
+                <div class="message {{ game_state['message_class'] }}">
+                    <h3>{{ game_state['message'] }}</h3>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+    <h2 class="caution">Caution: Selecting a game will destroy your current game</h2>
+    <div class="game_pool">
+        <a href="{{ url_for('select_game', target_game='blackjack') }}"
+           class={{ "active" if cur_game=='blackjack' else "inactive" }}>
+            <h3>Blackjack</h3>
+            <p>Card game where players aim to get a hand value of 21 or less, competing against the dealer without
+                busting. Face cards count as 10.</p>
+        </a>
+        <a href="{{ url_for('select_game', target_game='blackjack_eu') }}"
+           class={{ "active" if cur_game=='blackjack_eu' else "inactive" }}>
+            <h3>Blackjack_eu</h3>
+            <p>European version of the standard Blackjack, where the dealer receives only one card 
+                initially and does not check for blackjack until the player has acted.</p>
+        </a>
+        <a href="{{ url_for('select_game', target_game='whist') }}"
+           class={{ "active" if cur_game=='whist' else "inactive" }}>
+            <h3>Whist</h3>
+            <p>Classic four-player trick-taking card game played in fixed partnerships.
+                The team that wins the most tricks scores points, with the first to 5 points victorious.
+            </p>
+        </a>
+    </div>
+{% endblock %}

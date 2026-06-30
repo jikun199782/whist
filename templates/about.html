@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block main_content %}
+    <div class="text-box">
+        {% if supported %}
+            <h2>About Yifan Chen's Games Center(23211287)</h2>
+            <p>Welcome to Yifan Chen's Games Center(23211287)! This is a place to enjoy fun and interactive games. Our mission
+                is to provide entertainment and challenge for players of all ages.</p>
+            <p>This is version 1.2. It now includes the Blackjack and Freecell games. More games are to come within
+                months. Next will probably be a board game.
+                Stay tuned! We're constantly improving this app to enhance your experience.</p>
+            <p>Contact us at: <a href="mailto:rustacean@126.com">rustacean@126.com</a></p>
+            <p>For research works of the author, visit <a
+                    href="https://www.researchgate.net/profile/Yiping-Cheng/research">https://www.researchgate.net/profile/Yiping-Cheng/research</a>
+            </p>
+        {% else %}
+            <h2>Your requested game is currently not supported.</h2>
+        {% endif %}
+    </div>
+{% endblock %}

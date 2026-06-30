@@ -1,0 +1,211 @@
+/* Reset default margins and ensure box-sizing */
+* {
+    box-sizing: border-box;
+    margin: 0;
+}
+
+html {
+    scrollbar-gutter: stable;
+}
+
+/* Ensure the body takes the full viewport height */
+body {
+    width: 100vw;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column; /* Stack top and bottom sections vertically */
+    background-color: #ffffff;
+    overflow-x: auto; /* Allow horizontal scrolling if content overflows */
+    font-family: 'Arial', sans-serif;
+}
+
+/* Top section styling */
+.top-area {
+    background-color: #0a4a9c;
+
+    /*
+        Horizontal pinstripes:  1px light highlight + 1px base color
+    */
+    background-image: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.3) 0px,
+        rgba(255, 255, 255, 0.3) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+
+    /* The "Bezel" Border: Dark on the outside, light on the inside */
+    border: 1px solid #7a8a99;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.6), /* Top highlight */
+        0 2px 4px rgba(0, 0, 0, 0.1);          /* Soft outer depth */
+
+    color: white;
+    padding: 16px 24px;           /* Slightly reduced vertical padding */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex: 0 0 auto;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    gap: 20px;                    /* Space between title and menu */
+}
+
+/* Main title on the left (Your name + Games Center) */
+.top-heading {
+    font-size: 1.75rem;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+/* Container for current game name */
+.current-game {
+    font-size: 1.45rem;
+    font-weight: 500;
+    opacity: 0.95;
+    white-space: nowrap;
+    text-align: center;
+    flex-grow: 1;                 /* Takes available space */
+}
+
+/* Menu on the right */
+.menu ul {
+    display: flex;
+    list-style: none;
+    gap: 1.2rem;                  /* Better spacing */
+}
+
+.menu li {
+    margin: 0;
+}
+
+.menu a {
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+}
+
+.menu a:hover {
+    color: #ddd;
+    text-decoration: underline;
+}
+
+/* Style the text-box */
+.text-box {
+    padding: 2rem; /* Spacing around content */
+    margin: 0 auto; /* Centers the content */
+}
+
+.text-box h2 {
+    font-size: 1.5rem; /* Slightly smaller than top-heading */
+    margin-bottom: 1rem; /* Space below heading */
+}
+
+.text-box p {
+    margin-bottom: 1rem; /* Space between paragraphs */
+}
+
+.text-box ul {
+    margin-bottom: 1rem; /* Space between paragraphs */
+}
+
+.text-box a {
+    color: #007bff; /* Blue for links, matches hover color of menu */
+    text-decoration: none;
+}
+
+.text-box a:hover {
+    text-decoration: underline; /* Underline on hover for clarity */
+}
+
+.text-box .item-title {
+    font-weight: bold;
+}
+
+h2.caution {
+    padding: 10px;
+}
+
+.game_pool > * {
+    display: inline-block;
+    padding: 15px 30px;
+    background-color: forestgreen;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+    margin: 10px;
+}
+
+.game_pool > .active {
+    background-color: mediumvioletred;
+}
+
+.game_pool > *:hover {
+    transform: translateY(-4px);
+}
+
+.game-area {
+    background-color: #007000;
+    color: #fff;
+    border-top-left-radius: 0; /* Rectangular top-left corner */
+    border-top-right-radius: 0; /* Rectangular top-right corner */
+    border-bottom-left-radius: 10px; /* Round bottom-left corner */
+    border-bottom-right-radius: 10px; /* Round bottom-right corner */
+}
+
+.log-panel {
+    flex-grow: 1;
+    padding: 1vw;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    margin: 1vw;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+.log-entry {
+    margin: 0;
+    padding: 2px 0;
+    font-size: 0.9em;
+    line-height: 1.2;
+    color: #000;
+    font-family: Consolas, monospace; /* Monospaced font */
+}
+
+/* Card sprite styles for 52-card deck */
+:root {
+    /* Unitless - for aspect-ratio and calculations */
+    --card-width: 169;
+    --card-height: 244;
+
+    /* With px - for width/height properties */
+    --card-width-px: 169px;
+    --card-height-px: 244px;
+}
+
+/* ===== Global Message Type Colors ===== */
+.win-message   h3 { color: #00ff00; }   /* Bright Green - Victory */
+.error-message h3 { color: #ff9500; }   /* Orange-Red   - Errors / Invalid moves */
+.lose-message  h3 { color: #ff2d55; }   /* Strong Crimson - Defeat / Game Over loss */
+.tie-message   h3 { color: #ffcc00; }   /* Gold         - Draw / Tie */
+.info-message  h3 { color: #00ccff; }   /* Bright Cyan-Blue - Informational messages */
+
+@media (max-width: 600px) {
+    .top-area {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .menu ul {
+        flex-direction: column;
+        margin-top: 10px;
+    }
+    .menu li {
+        margin-left: 0;
+        margin-bottom: 10px;
+    }
+}

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+    <div class="text-box">
+        {% if cur_game=="blackjack" %}
+            <h2>Blackjack Rules:</h2>
+            <ul>
+                <li>The game is played with a standard deck of 52 cards.</li>
+                <li>Each player receives two cards at the beginning of the game.</li>
+                <li>The dealer only reveals one of their cards initially.</li>
+                <li>You can choose to take more cards (hit) or stay with your current cards (stand).</li>
+                <li>If you go over 21 points, you immediately lose (bust).</li>
+                <li>The dealer must hit until they reach at least 17 points.</li>
+                <li>If the dealer busts, you win.</li>
+                <li>If neither player busts, the one with the highest total wins.</li>
+            </ul>
+        {% elif cur_game=="blackjack_eu" %}
+            <h2>Blackjack_eu Rules:</h2>
+            <ul>
+                <li>The game is played with a standard deck of 52 cards.</li>
+                <li>Each player receives two cards at the beginning of the game.</li>
+                <li>The dealer receives only one card initially (no hole card).</li>
+                <li>You can choose to take more cards (hit) or stay with your current cards (stand).</li>
+                <li>If you go over 21 points, you immediately lose (bust).</li>
+                <li>The dealer must hit until they reach at least 17 points.</li>
+                <li>Dealer checks for blackjack only after you have finished your hand.</li>
+                <li>If neither busts, the one with the highest total wins.</li>
+            </ul>
+        {% elif cur_game=="whist" %}
+            <h2>Whist Rules</h2>
+            <p>Whist is a classic 4-player trick-taking card game played with partnerships. It is straightforward to
+                learn but offers deep strategic play. The game is played by two teams: North-South versus East-West.</p>
+
+            <h3>Objective:</h3>
+            <p>The goal is to win as many tricks as possible. Each team scores one point per trick won. The first team
+                to reach a predetermined score (usually 5 or 7 points) wins the game. In a single deal, the team with
+                more tricks wins that hand.</p>
+
+            <h3>Setup:</h3>
+            <ul>
+                <li><span class="item-title">Players:</span> 4 players sitting around a table in the positions North,
+                    East, South, and West. North and South are partners against East and West.
+                </li>
+                <li><span class="item-title">Deck:</span> A standard 52-card deck with no jokers.</li>
+                <li><span class="item-title">Deal:</span> All 52 cards are dealt face-down, giving each player exactly
+                    13 cards.
+                </li>
+                <li><span class="item-title">Trump:</span> The suit of the last card dealt (turned face-up) becomes the
+                    trump suit for the hand. This card is then placed into the dealer's hand.
+                </li>
+                <li><span class="item-title">Starting Player:</span> The player to the left of the dealer leads the
+                    first trick.
+                </li>
+            </ul>
+
+            <h3>Gameplay & Movement Rules:</h3>
+            <ul>
+                <li><span class="item-title">Following Suit:</span> Players must follow the suit of the card led if they
+                    have a card of that suit. If they cannot, they may play any card (including a trump).
+                </li>
+                <li><span class="item-title">Winning a Trick:</span> The highest card of the suit led wins the trick. If
+                    any trumps are played, the highest trump wins the trick.
+                </li>
+                <li><span class="item-title">Leading:</span> The winner of a trick leads the next trick. Any suit may be
+                    led.
+                </li>
+                <li><span class="item-title">Trump Usage:</span> Trump cards beat all other suits. They are powerful but
+                    should be used wisely.
+                </li>
+                <li><span class="item-title">Partnership:</span> Partners cannot communicate about their hands. You must
+                    rely on strategy and card counting.
+                </li>
+            </ul>
+
+            <h3>Winning the Game:</h3>
+            <ul>
+                <li><span class="item-title">Scoring:</span> Each trick won above 6 counts as one point for the team.
+                    (Example: winning 9 tricks = 3 points.)
+                </li>
+                <li><span class="item-title">Game End:</span> Play continues until one team reaches the target score
+                    (commonly 5 or 7 points). The first team to reach it wins.
+                </li>
+                <li><span class="item-title">Single Hand:</span> In this implementation, you play one full deal (13
+                    tricks) and the team with more tricks wins the hand.
+                </li>
+            </ul>
+
+            <h3>Additional Notes:</h3>
+            <ul>
+                <li><span class="item-title">Strategy:</span> Pay attention to what cards have been played, especially
+                    high cards and trumps. Try to exhaust your opponents’ cards in a suit before leading it.
+                </li>
+                <li><span class="item-title">South Position:</span> You play as South. North is your AI partner, while
+                    East and West are your opponents.
+                </li>
+                <li><span class="item-title">Card Display:</span> Your cards (South) are shown face-up. The other
+                    players’ cards are shown face-down with overlap to save space.
+                </li>
+                <li><span class="item-title">Legal Plays:</span> The game will only allow you to select cards that
+                    follow the rules (you must follow suit when possible).
+                </li>
+            </ul>
+        {% endif %}
+    </div>
+{% endblock %}

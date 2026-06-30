@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block main_content %}
+    <div class="log-panel" id="log-panel">
+        {% for entry in log %}
+            <div class="log-entry">[{{ entry[0].strftime('%Y-%m-%d %H:%M:%S') }}] {{ entry[1] }}</div>
+        {% endfor %}
+    </div>
+    <script>
+        // Scroll to the bottom of the log panel on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            const logPanel = document.getElementById('log-panel');
+            logPanel.scrollTop = logPanel.scrollHeight;
+        });
+    </script>
+{% endblock %}

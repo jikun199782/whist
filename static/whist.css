@@ -1,0 +1,396 @@
+/* ====================== CSS Variables ====================== */
+:root {
+    --central-width:  860px;
+    --central-height: 500px;
+
+    --card-width-px:  130px;
+    --card-height-px: 182px;
+}
+
+/* ====================== Main Table ====================== */
+.whist-table {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: minmax(190px, 240px) minmax(780px, var(--central-width)) minmax(190px, 240px);
+    grid-template-rows: 1fr auto;
+    gap: 16px 12px;
+    align-items: stretch;
+    justify-content: center;
+    padding: 20px 20px 30px;
+    min-height: 0;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* ====================== Main Areas ====================== */
+
+.west {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.east {
+    grid-column: 3 / 4;
+    grid-row: 1 / 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.nc-area {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    height: 100%;
+}
+
+.north {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+}
+
+.south {
+    grid-column: 1 / -1;
+    grid-row: 2 / 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ====================== Central Pool ====================== */
+
+.central-pool {
+    width: var(--central-width);
+    height: var(--central-height);
+    max-width: 100%;
+
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-rows: 1fr auto 1fr;
+
+    padding: calc(var(--central-height) * 0.06) calc(var(--central-width) * 0.04);
+    background: rgba(0, 60, 40, 0.92);
+    border: 5px solid #d4af37;
+    border-radius: 24px;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.7);
+    box-sizing: border-box;
+    gap: calc(var(--central-height) * 0.025);
+    overflow: visible;
+    position: relative;
+}
+
+.trick-north { grid-column: 2 / 3; grid-row: 1 / 2; align-self: end; justify-self: center; }
+.trick-south { grid-column: 2 / 3; grid-row: 3 / 4; align-self: start; justify-self: center; margin-top: 12px; }
+.trick-west  { grid-column: 1 / 2; grid-row: 2 / 3; align-self: center; justify-self: start; }
+.trick-east  { grid-column: 3 / 4; grid-row: 2 / 3; align-self: center; justify-self: end; }
+
+/* ====================== Trick Cards ====================== */
+
+.trick-north,
+.trick-east,
+.trick-south,
+.trick-west {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Use real card aspect ratio */
+    width:  calc(var(--central-width) * 0.13);   /* slightly increased for better visuals */
+    aspect-ratio: calc(var(--card-width)/var(--card-height));
+    max-height: calc(var(--central-height) * 0.27);
+}
+
+.trick-card {
+    object-fit: contain;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 4px 6px 14px rgba(0,0,0,0.6);
+    display: block;
+}
+
+/* Rotations - applied to the whole card */
+.trick-west .trick-card  { transform: rotate(90deg); }
+.trick-east .trick-card  { transform: rotate(-90deg); }
+
+/* ====================== Information Areas ====================== */
+
+/* Top Left & Right - Scores */
+.info-top-left,
+.info-top-right {
+    align-self: start;
+    justify-self: center;
+    color: #fff;
+    text-align: center;
+    line-height: 1.25;
+    font-size: calc(var(--central-width) * 0.028);
+    min-width: 140px;
+}
+
+.info-top-left {
+    justify-self: start;
+    padding-left: 12px;
+}
+
+.info-top-right {
+    justify-self: end;
+    padding-right: 12px;
+}
+
+.score-label {
+    font-size: 0.85em;
+    opacity: 0.85;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+}
+
+.score-number {
+    font-size: calc(var(--central-width) * 0.058);
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+/* Center Area */
+.center-area {
+    grid-column: 2 / 3;
+    grid-row: 2 / 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    z-index: 2;
+    pointer-events: auto;
+    text-align: center;
+}
+
+.trick-message {
+    color: #ffd700;
+    font-size: calc(var(--central-width) * 0.032);
+    font-weight: bold;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+    min-height: 1.5em;
+    padding: 0 20px;
+}
+
+/* Trump Area (Bottom Left) */
+.trump-area {
+    grid-column: 1 / 2;
+    grid-row: 3 / 4;
+    align-self: end;
+    justify-self: start;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: #fff;
+    font-size: calc(var(--central-width) * 0.027);
+    font-weight: 600;
+    padding-left: 12px;
+}
+
+.trump-svg {
+    width: calc(var(--central-width) * 0.16);
+    height: calc(var(--central-width) * 0.16);
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+}
+
+/* Bottom Right */
+.info-bottom-right {
+    grid-column: 3 / 4;
+    grid-row: 3 / 4;
+
+    display: flex;
+    align-items: center;        /* Vertical centering */
+    justify-content: center;    /* Horizontal centering */
+
+    color: #ddd;
+    font-size: calc(var(--central-width) * 0.025);
+    line-height: 1.4;
+}
+
+
+/* ====================== Player Labels ====================== */
+
+.player-label {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+    margin: 0;
+}
+
+/* ====================== Card Containers & Cards ====================== */
+
+.north-hand {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    line-height: 0;
+    padding: 0;
+    margin: 0;
+    height: calc(var(--card-height-px) * 0.72 + 12px);
+    overflow: hidden;
+}
+
+/* ====================== South Card Selection ====================== */
+
+.south-hand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    gap: 4px;                    /* Better spacing */
+    position: relative;
+}
+
+
+.west-hand,
+.east-hand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    width: 100%;
+    padding: 0;
+    overflow: visible;
+}
+
+/* Cards */
+.card {
+    box-sizing: border-box;
+    user-select: none;
+}
+
+/* North Cards */
+.north .card {
+    width: var(--card-width-px);
+    height: var(--card-height-px);
+    margin-left: calc(-0.6*var(--card-width-px));
+    transform: scale(0.72);
+    transform-origin: top center;
+    box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.55);
+    flex-shrink: 0;
+}
+.north .card:first-child { margin-left: 0; }
+
+/* South Cards - Base */
+.south .card {
+    width: var(--card-width-px);
+    height: var(--card-height-px);
+    margin-left: calc(-0.5 * var(--card-width-px));
+    box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.55);
+    /*transition: all 0.25s ease;*/
+    user-select: none;
+    outline: none;
+}
+
+.south .card:first-child {
+    margin-left: 0;
+}
+
+/* Eligible Cards */
+.south .card.eligible {
+    cursor: pointer;
+}
+
+.south .card.eligible:hover {
+    transform: translateY(-35px) scale(1.08);
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.6);
+    z-index: 10;
+}
+
+/* Selected */
+.south .card.selected {
+    transform: translateY(-55px) scale(1.12);
+    box-shadow: 0 20px 30px rgba(255, 215, 0, 0.6);
+    border: 4px solid #ffd700;
+    z-index: 20;
+}
+
+/* ============================================= */
+/* NON-ELIGIBLE CARDS - STRONGER RESET           */
+/* ============================================= */
+.south .card:not(.eligible) {
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+
+/* West & East Cards */
+.west .card, .east .card {
+    width:  var(--card-height-px);
+    height: var(--card-width-px);
+    max-width: 80%;
+    aspect-ratio: 244 / 169;
+
+    --overlap: 0.69;
+    margin-top: calc(var(--overlap) * -1 * var(--card-width-px));
+
+    filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.6));
+    flex-shrink: 0;
+    transform-origin: center center;
+}
+
+.west .card  { transform: rotate(-90deg); }
+.east .card  { transform: rotate(90deg); }
+
+.west .card:first-child,
+.east .card:first-child {
+    margin-top: 0;
+}
+
+/* ==================== PROCEED BUTTON ==================== */
+.proceed-btn {
+    display: none;                    /* Hidden by default */
+    padding: 14px 32px;
+    font-size: 1.15rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    margin: 20px auto 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 180px;
+}
+
+/* Make it visible when needed */
+.proceed-btn.visible {
+    display: block;
+}
+
+/* Enabled state */
+.proceed-btn:not(:disabled) {
+    background-color: #28a745;     /* Green */
+    color: white;
+}
+
+.proceed-btn:not(:disabled):hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+/* Disabled / Grayed out state */
+.proceed-btn:disabled,
+.proceed-btn.disabled {
+    background-color: #6c757d;
+    color: #e0e0e0;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}

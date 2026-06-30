@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yifan Chen's Games Center(23211287)</title>
+    <link rel="stylesheet" href="/static/base.css">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    {% block head %}{% endblock %}
+</head>
+<body>
+<div class="top-area">
+    <h1 class="top-heading">Yifan Chen's Games Center(23211287)</h1>
+    <div class="current-game">{{ session.get('cur_game','') | capitalize }}</div>
+    <nav class="menu">
+        <ul>
+            <li><a href="/select">Select</a></li>
+            <li><a href="/new_game">New</a></li>
+            <li><a href="/game">Play</a></li>
+            <li><a href="/rules">Rules</a></li>
+            <li><a href="/log">Log</a></li>
+            <li><a href="/about">About</a></li>
+        </ul>
+    </nav>
+</div>
+
+{% block main_content %}
+{% endblock %}
+</body>
+</html>
