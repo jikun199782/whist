@@ -1,0 +1,640 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <link rel="stylesheet" href="/static/whist.css">
+    <link rel="preload" href="/static/svg-cards.svg" as="image" type="image/svg+xml">
+{% endblock %}
+
+{% block main_content %}
+    {# ── Per-player perspective mapping ── #}
+    {% set slot = game_state.get('slot', {}) %}
+    {% set bottom = slot.get('south', 'south') %}   {# my hand → bottom #}
+    {% set top    = slot.get('north', 'north') %}   {# partner → top #}
+    {% set left   = slot.get('west', 'west') %}     {# left neighbour #}
+    {% set right  = slot.get('east', 'east') %}     {# right neighbour #}
+
+    {% set tricks = game_state.get('tricks', []) %}
+    {% set current_trick = tricks[-1] if tricks else {} %}
+    {% set is_multi = game_state.get('is_multiplayer', False) %}
+    {% set my_pos = game_state.get('my_position', '') %}
+    {% set game_id = game_state.get('game_id', '') %}
+    {% set is_my_turn = game_state.get('is_my_turn', False) %}
+
+    <script>
+        // === PYTHON → JAVASCRIPT DATA TRANSFER ===
+        window.gameState = {
+            stop_type: "{{ game_state['stop_type'] }}",
+            player_hand: {{ game_state['hands'][my_pos] | tojson if my_pos else '[]' }},
+            leader: {{ game_state['leader'] | tojson }},
+            current_trick: {{ (game_state['tricks'][-1] if game_state['tricks'] else {}) | tojson }},
+            is_multiplayer: true,
+            my_position: {{ my_pos | tojson }},
+            my_token: {{ game_state['my_token'] | tojson }},
+            game_id: {{ game_id | tojson }},
+            scores: {{ game_state['scores'] | tojson }},
+            is_my_turn: {{ is_my_turn | tojson }},
+            trump_suit: {{ game_state['trump_suit'] | tojson }},
+            version: {{ game_state.get('version', 0) | tojson }},
+            next_player: {{ game_state['next_player'] | tojson }},
+            next_player_name: {{ game_state['next_player_name'] | tojson }}
+        };
+    </script>
+
+    <div class="game-area">
+        <div class="whist-table">
+
+            {# ===== Left player ===== #}
+            <div class="west">
+                <div class="player-label">{{ left|capitalize }}: {{ game_state['players'][left] }}</div>
+                <div class="west-hand">
+                    {% for card in game_state['hands'][left] %}
+                        <svg class="card" viewBox="0 0 169 244">
+                            <use href="/static/svg-cards.svg#{{ get_card_name(card) }}"/>
+                        </svg>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {# ===== Top player + Central Area ===== #}
+            <div class="nc-area">
+                <!-- Top player -->
+                <div class="north">
+                    <div class="player-label">{{ top|capitalize }}: {{ game_state['players'][top] }}</div>
+                    <div class="north-hand">
+                        {% for card in game_state['hands'][top] %}
+                            <svg class="card" viewBox="0 0 169 244">
+                                <use href="/static/svg-cards.svg#{{ get_card_name(card) }}"/>
+                            </svg>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Central Pool -->
+                <div class="central-pool">
+                    {# Top Left: East-West Score #}
+                    <div class="info-top-left">
+                        <div class="score-label">East-West</div>
+                        <div class="score-number">{{ game_state['scores']['east_west'] }}</div>
+                    </div>
+
+                    {# Top Right: South-North Score #}
+                    <div class="info-top-right">
+                        <div class="score-label">South-North</div>
+                        <div class="score-number">{{ game_state['scores']['south_north'] }}</div>
+                    </div>
+
+                    {# Trick Cards — mapped through slot #}
+                    <div class="trick-north">
+                        <svg class="trick-card" viewBox="0 0 169 244">
+                            {% if current_trick[top] %}
+                                <use href="/static/svg-cards.svg#{{ get_card_name(current_trick[top]) }}"/>
+                            {% else %}
+                                <rect width="169" height="244" fill="#ffffff" rx="8" ry="8"/>
+                            {% endif %}
+                        </svg>
+                    </div>
+
+                    <div class="trick-east">
+                        <svg class="trick-card" viewBox="0 0 169 244">
+                            {% if current_trick[right] %}
+                                <use href="/static/svg-cards.svg#{{ get_card_name(current_trick[right]) }}"/>
+                            {% else %}
+                                <rect width="169" height="244" fill="#ffffff" rx="8" ry="8"/>
+                            {% endif %}
+                        </svg>
+                    </div>
+
+                    <div class="trick-south">
+                        <svg class="trick-card" viewBox="0 0 169 244">
+                            {% if current_trick[bottom] %}
+                                <use href="/static/svg-cards.svg#{{ get_card_name(current_trick[bottom]) }}"/>
+                            {% else %}
+                                <rect width="169" height="244" fill="#ffffff" rx="8" ry="8"/>
+                            {% endif %}
+                        </svg>
+                    </div>
+
+                    <div class="trick-west">
+                        <svg class="trick-card" viewBox="0 0 169 244">
+                            {% if current_trick[left] %}
+                                <use href="/static/svg-cards.svg#{{ get_card_name(current_trick[left]) }}"/>
+                            {% else %}
+                                <rect width="169" height="244" fill="#ffffff" rx="8" ry="8"/>
+                            {% endif %}
+                        </svg>
+                    </div>
+
+                    {# Center Area: Message + Button #}
+                    <div class="center-area">
+                        {% if game_state['message'] %}
+                            <div class="message {{ game_state['message_class'] }}">
+                                <h3>{{ game_state['message'] }}</h3>
+                            </div>
+                        {% endif %}
+
+                        <button class="proceed-btn hidden" id="proceed-btn">
+                    </div>
+
+                    {# Bottom Left: Trump #}
+                    <div class="trump-area">
+                        {% if game_state['trump_suit'] %}
+                            <img src="/static/{{ game_state['trump_suit_name'] }}.svg"
+                                 class="trump-svg">
+                        {% endif %}
+                    </div>
+
+                    {# Bottom Right: Trick Counter #}
+                    <div class="info-bottom-right">
+                        <div id="trick-counter">
+                            Trick {{ (game_state['scores'].values() | sum) +
+                            (1 if game_state['stop_type'] not in ['game_over', 'new_trick', 'waiting'] else 0) }} / 13
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# ===== Right player ===== #}
+            <div class="east">
+                <div class="player-label">{{ right|capitalize }}: {{ game_state['players'][right] }}</div>
+                <div class="east-hand">
+                    {% for card in game_state['hands'][right] %}
+                        <svg class="card" viewBox="0 0 169 244">
+                            <use href="/static/svg-cards.svg#{{ get_card_name(card) }}"/>
+                        </svg>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {# ===== Bottom player (ME) ===== #}
+            <div class="south">
+                <div class="player-label">{{ bottom|capitalize }}: {{ game_state['players'][bottom] }}</div>
+                <div class="south-hand" id="my-hand">
+                    <!-- Built by JavaScript -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {# ===== Share Link + Seat Management (host only, waiting state) ===== #}
+    {% if game_state['stop_type'] == 'waiting' and my_pos == 'south' %}
+    <div id="share-box" style="text-align:center; margin: 12px auto; padding: 10px; background: #e8f5e9; border-radius: 8px; max-width: 700px;">
+        <strong>Share this link with friends:</strong><br>
+        <input type="text" readonly
+               value="{{ game_state['share_link'] }}"
+               style="width: 60%; padding: 6px; font-size: 14px; text-align: center;"
+               onclick="this.select(); document.execCommand('copy');">
+        <br><small>(click to copy — Host can rearrange seats below before starting)</small>
+
+        {# ── Seat management ── #}
+        {% set seat_order = ['north', 'east', 'west'] %}
+        {% set role_map = {'north': 'your teammate', 'east': 'opponent', 'west': 'opponent'} %}
+        <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed #aaa; text-align: left;">
+            <strong style="font-size: 15px;">Seat Assignments:</strong>
+            <table style="width: 100%; margin-top: 8px; font-size: 14px; border-collapse: collapse;">
+            {% for seat in seat_order %}
+                {% set occupant = game_state['players'][seat] %}
+                {% set is_human = game_state['seat_types'][seat] == 'human' %}
+                <tr style="border-bottom: 1px dotted #ccc;">
+                    <td style="padding: 6px 8px; font-weight: bold; white-space: nowrap;">
+                        {{ seat|capitalize }} ({{ role_map[seat] }}):
+                    </td>
+                    <td style="padding: 6px 8px;">
+                        {{ occupant }}
+                    </td>
+                    <td style="padding: 4px 6px; text-align: right; white-space: nowrap;">
+                        {% for target in seat_order %}
+                            {% if target != seat %}
+                                <a href="/multi/swap/{{ game_id }}/{{ seat }}/{{ target }}?pos=south&token={{ game_state['my_token'] }}"
+                                   style="display: inline-block; margin: 2px; padding: 3px 10px;
+                                          background: #1976d2; color: #fff; border-radius: 4px;
+                                          text-decoration: none; font-size: 12px;"
+                                   title="Swap {{ seat|capitalize }} ↔ {{ target|capitalize }}">
+                                    ⇄ {{ target|capitalize }}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </table>
+            <p style="margin: 6px 0 0; font-size: 12px; color: #666;">
+                Click a blue button to move a player to that seat. Moved players need a new invite link.</p>
+        </div>
+    </div>
+    {% endif %}
+
+    {# ===== Status message (shown when it's not my turn or waiting) ===== #}
+    <div id="status-message" style="text-align:center; margin: 16px 0; color: #fff;">
+        {% if game_state['stop_type'] == 'waiting' %}
+            <h3>Waiting for players to join...</h3>
+            <p>Seats fill automatically: North → East → West</p>
+        {% elif not is_my_turn and game_state['stop_type'] not in ('game_over', 'new_trick') %}
+            <h3>Waiting for {{ game_state['next_player_name'] or 'others' }}...</h3>
+        {% elif game_state['stop_type'] == 'game_over' %}
+            {# message already shown in center area #}
+        {% endif %}
+    </div>
+
+    {# ===== Multiplayer JavaScript ===== #}
+    <script>
+        // ==================== GLOBAL STATE ====================
+        let selectedCard = null;
+        let gameState = window.gameState || {};
+        let lastVersion = gameState.version || 0;
+        const GAME_ID = gameState.game_id;
+
+        // Per-tab identity persistence (survives session overwrite by other tabs)
+        const STORAGE_KEY_POS = 'whist_pos_' + GAME_ID;
+        const STORAGE_KEY_TOKEN = 'whist_token_' + GAME_ID;
+
+        // On first load, save identity to sessionStorage.
+        // On reload, URL params are authoritative; sessionStorage is fallback.
+        (function fixIdentity() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlPos = urlParams.get('pos');
+            const urlToken = urlParams.get('token');
+
+            if (urlPos && urlToken) {
+                // URL carries identity — it's the source of truth
+                gameState.my_position = urlPos;
+                gameState.my_token = urlToken;
+                sessionStorage.setItem(STORAGE_KEY_POS, urlPos);
+                sessionStorage.setItem(STORAGE_KEY_TOKEN, urlToken);
+            } else {
+                // No URL params — try sessionStorage (survives cross-tab cookie overwrites)
+                const storedPos = sessionStorage.getItem(STORAGE_KEY_POS);
+                const storedToken = sessionStorage.getItem(STORAGE_KEY_TOKEN);
+                if (storedPos && storedToken) {
+                    gameState.my_position = storedPos;
+                    gameState.my_token = storedToken;
+                }
+            }
+        })();
+
+        // Build a query string carrying per-tab identity
+        function identityParams() {
+            const pos = gameState.my_position || '';
+            const tok = gameState.my_token || '';
+            return 'pos=' + encodeURIComponent(pos) + '&token=' + encodeURIComponent(tok);
+        }
+
+        // ==================== HELPER FUNCTIONS ====================
+        function getLeadSuit() {
+            if (!gameState?.current_trick || Object.keys(gameState.current_trick).length === 0) {
+                return null;
+            }
+            const leadCard = gameState.current_trick[gameState.leader];
+            return leadCard ? leadCard[1] : null;
+        }
+
+        function isCardEligible(card) {
+            if (!gameState || !gameState.is_my_turn) return false;
+            if (gameState.stop_type === 'new_trick' || gameState.stop_type === 'game_over') {
+                return false;
+            }
+            if (gameState.stop_type === 'lead_card') return true;
+
+            // follow_card: must follow suit if possible
+            const leadSuit = getLeadSuit();
+            if (!gameState.player_hand.some(c => c[1] === leadSuit)) {
+                return true; // void in led suit
+            }
+            return card[1] === leadSuit;
+        }
+
+        // ==================== BUTTON FUNCTIONS ====================
+        function enableProceedButton() {
+            const btn = document.getElementById('proceed-btn');
+            if (btn) {
+                btn.disabled = false;
+                btn.classList.remove('disabled');
+            }
+        }
+
+        // ==================== PROCEED ACTION ====================
+        function proceedAction() {
+            const btn = document.getElementById('proceed-btn');
+            if (!btn || btn.disabled) return;
+
+            btn.disabled = true;
+            btn.classList.add('disabled');
+
+            if (!gameState || gameState.stop_type === 'game_over') return;
+
+            if (gameState.stop_type === 'waiting') {
+                window.location.href = '/multi/start/' + GAME_ID + '?' + identityParams();
+                return;
+            }
+
+            if (gameState.stop_type === 'new_trick') {
+                window.location.href = '/multi/new_trick/' + GAME_ID + '?' + identityParams();
+                return;
+            }
+
+            if (selectedCard) {
+                const cardStr = selectedCard[0] + ',' + selectedCard[1];
+                window.location.href = '/multi/play/' + GAME_ID + '/' + cardStr + '?' + identityParams();
+            }
+        }
+
+        // ==================== BUTTON INITIALIZATION ====================
+        function initProceedButton() {
+            const btn = document.getElementById('proceed-btn');
+            if (!btn) return;
+
+            if (!gameState || !gameState.stop_type) {
+                btn.classList.remove('visible');
+                return;
+            }
+
+            if (!gameState.is_my_turn && gameState.stop_type !== 'new_trick'
+                && gameState.stop_type !== 'waiting') {
+                btn.classList.remove('visible');
+                return;
+            }
+
+            switch (gameState.stop_type) {
+                case 'waiting':
+                    if (gameState.my_position !== 'south') {
+                        btn.classList.remove('visible');
+                        return;
+                    }
+                    btn.textContent = 'Start Game';
+                    btn.disabled = false;
+                    btn.classList.add('visible');
+                    break;
+                case 'new_trick':
+                    if (!gameState.is_my_turn) {
+                        btn.classList.remove('visible');
+                        return;
+                    }
+                    btn.textContent = 'New Trick';
+                    btn.disabled = false;
+                    btn.classList.add('visible');
+                    break;
+                case 'lead_card':
+                    if (!gameState.is_my_turn) {
+                        btn.classList.remove('visible');
+                        return;
+                    }
+                    btn.textContent = 'Lead Card';
+                    btn.disabled = true;
+                    btn.classList.add('visible');
+                    break;
+                case 'follow_card':
+                    if (!gameState.is_my_turn) {
+                        btn.classList.remove('visible');
+                        return;
+                    }
+                    btn.textContent = 'Follow Card';
+                    btn.disabled = true;
+                    btn.classList.add('visible');
+                    break;
+                default:
+                    btn.classList.remove('visible');
+                    return;
+            }
+
+            btn.classList.toggle('disabled', btn.disabled);
+            // Remove old listener, add new one (avoid duplicates on poll-reload)
+            btn.removeEventListener('click', proceedAction);
+            btn.addEventListener('click', proceedAction);
+        }
+
+        // ==================== CARD SVG HELPERS ====================
+        const CARD_SUIT_MAP = {H:'heart', S:'spade', D:'diamond', C:'club'};
+        const CARD_RANK_MAP = {A:'1', K:'king', Q:'queen', J:'jack', T:'10',
+                               '9':'9','8':'8','7':'7','6':'6','5':'5','4':'4','3':'3','2':'2'};
+
+        function getCardSvgId(card) {
+            if (!card) return null;
+            return CARD_SUIT_MAP[card[1]] + '_' + CARD_RANK_MAP[card[0]];
+        }
+
+        function createCardSvg(card, extraClass) {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("class", "card" + (extraClass ? ' ' + extraClass : ''));
+            svg.setAttribute("viewBox", "0 0 169 244");
+            const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+            use.setAttribute("href", "/static/svg-cards.svg#" + getCardSvgId(card));
+            svg.appendChild(use);
+            return svg;
+        }
+
+        // ==================== RENDER MY HAND ====================
+        const CARD_SEL_KEY = 'whist_sel_' + GAME_ID;
+
+        function renderMyHand() {
+            const container = document.getElementById('my-hand');
+            if (!container || !gameState?.player_hand) return;
+
+            container.innerHTML = '';
+
+            // Restore previous selection from sessionStorage
+            const savedSel = sessionStorage.getItem(CARD_SEL_KEY);
+            let savedCardStr = null;
+            if (savedSel) {
+                try { savedCardStr = JSON.parse(savedSel); } catch(e) {}
+            }
+
+            gameState.player_hand.forEach(card => {
+                const svg = createCardSvg(card);
+
+                if (isCardEligible(card)) {
+                    svg.classList.add('eligible');
+                    svg.addEventListener('click', () => selectCard(svg, card));
+                }
+
+                // Restore selection if this card was previously selected
+                if (savedCardStr && card[0] === savedCardStr[0] && card[1] === savedCardStr[1]) {
+                    svg.classList.add('selected');
+                    selectedCard = card;
+                    enableProceedButton();
+                }
+
+                container.appendChild(svg);
+            });
+        }
+
+        // ==================== CARD SELECTION ====================
+        function selectCard(cardElement, cardData) {
+            document.querySelectorAll('#my-hand .card').forEach(c => {
+                c.classList.remove('selected');
+            });
+            cardElement.classList.add('selected');
+            selectedCard = cardData;
+            // Persist selection so page reloads don't lose it
+            sessionStorage.setItem(CARD_SEL_KEY, JSON.stringify(cardData));
+            enableProceedButton();
+        }
+
+        // ==================== DOM UPDATE HELPERS ====================
+        function updateScores(data) {
+            if (!data.scores) return;
+            const nums = document.querySelectorAll('.score-number');
+            if (nums.length >= 2) {
+                nums[0].textContent = data.scores.east_west;
+                nums[1].textContent = data.scores.south_north;
+            }
+        }
+
+        function updateMessage(data) {
+            const centerArea = document.querySelector('.center-area');
+            if (!centerArea) return;
+            let msgDiv = centerArea.querySelector('.message');
+            if (data.message) {
+                if (!msgDiv) {
+                    msgDiv = document.createElement('div');
+                    msgDiv.className = 'message';
+                    const h3 = document.createElement('h3');
+                    msgDiv.appendChild(h3);
+                    centerArea.insertBefore(msgDiv, centerArea.firstChild);
+                }
+                msgDiv.className = 'message ' + (data.message_class || 'info-message');
+                msgDiv.querySelector('h3').textContent = data.message;
+            } else if (msgDiv) {
+                msgDiv.remove();
+            }
+        }
+
+        function updateTrickCards(data) {
+            if (!data.trick) return;
+            // The central-pool display slots are rotated per player.
+            // slot maps: display position → game position.
+            // e.g. for East player: slot.north='west' → .trick-north shows West's card
+            const slot = data.slot || {north:'north', east:'east', south:'south', west:'west'};
+            const displaySlots = {
+                north: { el: document.querySelector('.trick-north .trick-card use'), gamePos: slot.north },
+                east:  { el: document.querySelector('.trick-east .trick-card use'),  gamePos: slot.east },
+                south: { el: document.querySelector('.trick-south .trick-card use'), gamePos: slot.south },
+                west:  { el: document.querySelector('.trick-west .trick-card use'),  gamePos: slot.west },
+            };
+            for (const [displayPos, ds] of Object.entries(displaySlots)) {
+                const card = data.trick[ds.gamePos];
+                const useEl = ds.el;
+                if (!useEl) continue;
+                const svg = useEl.closest('svg');
+                if (card) {
+                    const svgId = getCardSvgId(card);
+                    if (svgId) {
+                        // Ensure there's a <use> element (may have been replaced by rect)
+                        if (!svg.querySelector('use')) {
+                            // Remove any rect placeholders
+                            svg.querySelectorAll('rect').forEach(r => r.remove());
+                            const newUse = document.createElementNS("http://www.w3.org/2000/svg", "use");
+                            svg.appendChild(newUse);
+                            ds.el = newUse;  // update reference
+                        }
+                        svg.querySelector('use').setAttribute('href', '/static/svg-cards.svg#' + svgId);
+                    }
+                } else {
+                    // Card slot is empty — show blank rect
+                    const existingUse = svg.querySelector('use');
+                    if (existingUse) existingUse.remove();
+                    if (!svg.querySelector('rect')) {
+                        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                        rect.setAttribute('width', '169');
+                        rect.setAttribute('height', '244');
+                        rect.setAttribute('fill', '#ffffff');
+                        rect.setAttribute('rx', '8');
+                        rect.setAttribute('ry', '8');
+                        svg.appendChild(rect);
+                    }
+                }
+            }
+            // Update trick counter
+            const counter = document.getElementById('trick-counter');
+            if (counter && data.scores) {
+                const total = (data.scores.south_north || 0) + (data.scores.east_west || 0);
+                const inTrick = (data.stop_type && data.stop_type !== 'game_over'
+                    && data.stop_type !== 'new_trick' && data.stop_type !== 'waiting') ? 1 : 0;
+                counter.textContent = 'Trick ' + (total + inTrick) + ' / 13';
+            }
+        }
+
+        function updateWaitingMessage(data) {
+            const statusEl = document.getElementById('status-message');
+            if (!statusEl) return;
+            if (data.stop_type === 'waiting') {
+                statusEl.innerHTML = '<h3>Waiting for players to join...</h3>'
+                    + '<p>Seats fill automatically: North → East → West</p>';
+            } else if (!data.is_my_turn && data.stop_type !== 'game_over'
+                       && data.stop_type !== 'new_trick') {
+                const name = data.players && data.next_player
+                    ? data.players[data.next_player] : 'others';
+                statusEl.innerHTML = '<h3>Waiting for ' + name + '...</h3>';
+            } else {
+                statusEl.innerHTML = '';
+            }
+        }
+
+        // ==================== POLLING (multiplayer) ====================
+        let lastStopType = gameState.stop_type || '';
+        let lastIsMyTurn = gameState.is_my_turn || false;
+
+        function pollStatus() {
+            if (!GAME_ID) return;
+            fetch('/multi/status/' + GAME_ID + '?' + identityParams())
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.version || data.version === lastVersion) return;
+                    lastVersion = data.version;
+
+                    // Update gameState with latest server data
+                    gameState.stop_type = data.stop_type;
+                    gameState.scores = data.scores;
+                    gameState.current_trick = data.trick;
+                    gameState.leader = data.leader;
+
+                    // Determine if we need a full page reload
+                    const stopChanged = (data.stop_type !== lastStopType);
+                    const becameMyTurn = (data.is_my_turn && !lastIsMyTurn);
+                    const majorChange = (data.stop_type === 'new_trick'
+                        || data.stop_type === 'game_over'
+                        || data.stop_type === 'waiting');
+
+                    if (majorChange || becameMyTurn) {
+                        // Full reload for major state transitions
+                        window.location.reload();
+                        return;
+                    }
+
+                    // Incremental update (same stop_type, AI played within trick)
+                    lastStopType = data.stop_type;
+                    lastIsMyTurn = data.is_my_turn;
+                    gameState.is_my_turn = data.is_my_turn;
+
+                    updateScores(data);
+                    updateMessage(data);
+                    updateTrickCards(data);
+                    updateWaitingMessage(data);
+                    initProceedButton();
+
+                    // If not my turn, clear selection (cards no longer eligible)
+                    if (!data.is_my_turn) {
+                        selectedCard = null;
+                        sessionStorage.removeItem(CARD_SEL_KEY);
+                    }
+                })
+                .catch(() => {});  // silently ignore network errors
+        }
+
+        // ==================== INITIALIZATION ====================
+        function initializeGame() {
+            gameState = window.gameState || {};
+            lastStopType = gameState.stop_type || '';
+            lastIsMyTurn = gameState.is_my_turn || false;
+            renderMyHand();
+            initProceedButton();
+
+            // Start polling in multiplayer mode (2-second interval)
+            if (gameState.is_multiplayer) {
+                setInterval(pollStatus, 2000);
+            }
+        }
+
+        // Start
+        document.addEventListener('DOMContentLoaded', initializeGame);
+    </script>
+{% endblock %}
