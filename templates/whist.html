@@ -146,7 +146,22 @@
 
             <!-- South (You) -->
             <div class="south">
-                <div class="player-label">South: {{ game_state['players']['south'] }}</div>
+                <div class="player-label">South: {{ game_state['players']['south'] }}
+                    {% set diff = game_state.get('difficulty', 'easy') %}
+                    {% set can_change = game_state['stop_type'] == 'new_trick' and not game_state.get('tricks', []) %}
+                    {% if can_change %}
+                        <span style="font-size: 0.7em; margin-left: 8px;">| AI:
+                            <a href="/game_update/difficulty/easy"
+                               class="diff-toggle {{ 'active' if diff == 'easy' }}">Easy</a>
+                            <a href="/game_update/difficulty/hard"
+                               class="diff-toggle {{ 'active' if diff == 'hard' }}">Hard</a>
+                        </span>
+                    {% else %}
+                        <span style="font-size: 0.7em; color: #ffd700; margin-left: 8px;">
+                            [AI: {{ diff|capitalize }}]
+                        </span>
+                    {% endif %}
+                </div>
                 <div class="south-hand" id="south-hand">
                     <!-- Built by JavaScript -->
                 </div>

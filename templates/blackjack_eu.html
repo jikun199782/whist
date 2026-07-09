@@ -10,20 +10,12 @@
         <div class="dealer-area">
             <h2>Dealer's Hand ({{ game_state['dealer_value'] }})</h2>
             <div class="cards">
-                {% if not game_state['message'] %}
+                {# 欧洲版：玩家回合时庄家只有 1 张明牌；游戏结束后展示全部手牌 #}
+                {% for card in game_state['dealer_hand'] %}
                     <svg class="card" viewBox="0 0 169 244">
-                        <use href="/static/svg-cards.svg#{{ get_card_name(game_state['dealer_hand'][0]) }}"/>
+                        <use href="/static/svg-cards.svg#{{ get_card_name(card) }}"/>
                     </svg>
-                    <svg class="card" viewBox="0 0 169 244">
-                        <use href="/static/svg-cards.svg#back"/>
-                    </svg>
-                {% else %}
-                    {% for card in game_state['dealer_hand'] %}
-                        <svg class="card" viewBox="0 0 169 244">
-                            <use href="/static/svg-cards.svg#{{ get_card_name(card) }}"/>
-                        </svg>
-                    {% endfor %}
-                {% endif %}
+                {% endfor %}
             </div>
         </div>
 

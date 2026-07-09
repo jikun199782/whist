@@ -3,7 +3,7 @@
 {% block main_content %}
     <div class="log-panel" id="log-panel">
         {% for entry in log %}
-            <div class="log-entry">[{{ entry[0].strftime('%Y-%m-%d %H:%M:%S') }}] {{ entry[1] }}</div>
+            <div class="log-entry">[{{ entry[0] }}] {{ entry[1] }}</div>
         {% endfor %}
     </div>
     <script>

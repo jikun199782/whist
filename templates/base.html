@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yifan Chen's Games Center(23211287)</title>
     <link rel="stylesheet" href="/static/base.css">
-    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     {% block head %}{% endblock %}
 </head>
 <body>
 <div class="top-area">
     <h1 class="top-heading">Yifan Chen's Games Center(23211287)</h1>
-    <div class="current-game">{{ session.get('cur_game','') | capitalize }}</div>
+    <div class="current-game">{{ session.get('cur_game','').replace('_',' ') | capitalize }}</div>
     <nav class="menu">
         <ul>
             <li><a href="/select">Select</a></li>
